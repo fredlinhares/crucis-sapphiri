@@ -1,6 +1,8 @@
+# coding: utf-8
+=begin
 MIT License
 
-Copyright (c) 2016 Frederico de Oliveira Linhares <fred@linhares.blue>
+Copyright (c) 2016 Frederico de Oliveira Linhares
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +21,29 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+=end
+
+require 'curses'
+
+require './lib/data_file.rb'
+
+module Main
+  file = DataFile.new(ARGV[0])
+
+  # Initialize curses mode.
+  Curses.init_screen
+  begin
+    Curses.raw
+    Curses.noecho
+
+    # Show text on screen.
+    Curses.lines.times do |line|
+      Curses.addstr(file.lines[line])
+    end
+
+    Curses.refresh
+    Curses.getch
+  ensure
+    Curses.close_screen
+  end
+end
