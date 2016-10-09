@@ -23,27 +23,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class DataFile
-  def initialize(file_path)
-    @lines = []
+class FileCursor
+  def initialize(file)
+    @col = 0
+    @line = 0
 
-    # Open file and save data from it.
-    File.open(file_path, "r") do |file|
-      while line = file.gets
-        @lines << line
-      end
+    @file = file
+  end
+
+  def col=(pos_col)
+    @col = pos_col
+  end
+
+  def line=(pos_line)
+    @line = pos_line
+  end
+
+  def col
+    # If a user move up or down to a row with less cols than the previous, this
+    # code prevent the y position to be lost.
+    if @file.line(@line).size < @col
+      return @file.line(@line).size
+    else
+      return @col
     end
   end
 
-  def lines
-    return @lines.size
-  end
-
-  def line(number)
-    return @lines[number]
-  end
-
-  def line_size(number)
-    return @lines[number].size
+  def line
+    return @line
   end
 end

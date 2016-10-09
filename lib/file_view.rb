@@ -23,27 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class DataFile
-  def initialize(file_path)
-    @lines = []
+class FileView
+  attr_accessor :col, :line, :cols, :lines
 
-    # Open file and save data from it.
-    File.open(file_path, "r") do |file|
-      while line = file.gets
-        @lines << line
-      end
-    end
-  end
+  def initialize(cols, lines)
+    @col = 0
+    @line = 0
 
-  def lines
-    return @lines.size
-  end
-
-  def line(number)
-    return @lines[number]
-  end
-
-  def line_size(number)
-    return @lines[number].size
+    @cols = cols
+    @lines = lines
   end
 end
