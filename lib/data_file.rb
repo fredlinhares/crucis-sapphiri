@@ -30,7 +30,7 @@ class DataFile
     # Open file and save data from it.
     File.open(file_path, "r") do |file|
       while line = file.gets
-        @lines << line
+        @lines << line.chomp
       end
     end
   end

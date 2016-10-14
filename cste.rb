@@ -73,9 +73,8 @@ module Main
       str_line = @@file.line(@@view.line + line)[@@view.col, @@view.cols]
       if str_line
         Curses.addstr(str_line)
-      else
-        Curses.addstr("\n")
       end
+      Curses.addstr("\n")
     end
 
     Curses.setpos(
