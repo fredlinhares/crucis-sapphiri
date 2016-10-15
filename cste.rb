@@ -26,7 +26,6 @@ SOFTWARE.
 require 'curses'
 
 require './lib/data_file.rb'
-require './lib/file_cursor.rb'
 require './lib/file_view.rb'
 
 module Main
@@ -94,7 +93,7 @@ module Main
     @@view = FileView.new(Curses.cols, Curses.lines)
 
     # Cursor position.
-    @@curs = FileCursor.new(@@file)
+    @@curs = @@file.cursor
 
     Curses.raw
     Curses.noecho
@@ -147,6 +146,9 @@ module Main
           @@curs.col += 1
         end
         update_view_pos
+
+      when ?\n.ord then
+        @@file.split_line
 
       when 'q' then
         quit = true
