@@ -50,6 +50,14 @@ class DataFile
     return @lines[number]
   end
 
+  def set_line(number, new_line)
+    return @lines[number] = new_line
+  end
+
+  def delete_line(number)
+    @lines.delete_at(number)
+  end
+
   def line_size(number)
     return @lines[number].size
   end

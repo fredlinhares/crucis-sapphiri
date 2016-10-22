@@ -150,6 +150,31 @@ module Main
       when ?\n.ord then
         @@file.split_line
 
+      when 127 then
+        # If cursor is at the begning of the line.
+        if @@curs.col == 0 and @@curs.line > 0 then
+          # Move cursor.
+          @@curs.line -= 1
+          @@curs.col = @@file.line(@@curs.line).size
+
+          # Join two lines.
+          @@file.set_line(
+            @@curs.line,
+            @@file.line(@@curs.line) + @@file.line(@@curs.line + 1))
+
+          # Delete old line.
+          @@file.delete_line(@@curs.line + 1)
+        elsif @@curs.col > 0 then
+          new_line = @@curs.col - 1
+          # Delete char.
+          c_line = @@file.line(@@curs.line)
+          @@file.set_line(@@curs.line, c_line[0, @@curs.col-1] +
+                                   c_line[@@curs.col, c_line.size])
+
+          # Back cursor one char.
+          @@curs.col = new_line
+        end
+
       when 'q' then
         quit = true
       end
