@@ -105,14 +105,14 @@ module Main
       key = Curses.getch
 
       case key
-      when 'e' then
+      when ?\C-c.ord then
         # Move up
         if @@curs.line > 0
           @@curs.line -= 1
           update_view_pos
         end
 
-      when 's' then
+      when ?\C-h.ord then
         if @@curs.col == 0 then
           # Move to end of prefious line.
           if @@curs.line > 0 then
@@ -125,14 +125,14 @@ module Main
         end
         update_view_pos
 
-      when 'd' then
+      when ?\C-t.ord then
         # Move down
         if @@curs.line < @@file.lines - 1
           @@curs.line += 1
           update_view_pos
         end
 
-      when 'f' then
+      when ?\C-n.ord then
         # If you try to move beyond the size of the line.
         if @@file.line_size(@@curs.line) < (@@curs.col + 1) then
           # If there is another line.
@@ -175,8 +175,17 @@ module Main
           @@curs.col = new_line
         end
 
-      when 'q' then
+      when ?\C-q.ord then
         quit = true
+
+      else
+        if key.is_a?(String) then
+          @@file.set_line(
+            @@curs.line,
+            @@file.line(@@curs.line).insert(@@curs.col, key))
+
+          @@curs.col += 1
+        end
       end
 
       update_screen
