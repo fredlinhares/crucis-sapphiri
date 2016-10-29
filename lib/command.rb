@@ -112,6 +112,7 @@ class Command
           @file.line(@curs.line).insert(@curs.col, key))
 
         @curs.col += 1
+        @view.update_pos
       end
     end
     return false

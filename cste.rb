@@ -39,7 +39,7 @@ module Main
       break if (@@view.line + line) >= @@file.lines
 
       # Print line at screen.
-      str_line = @@file.line(@@view.line + line)[@@view.col, @@view.cols]
+      str_line = @@file.line(@@view.line + line)[@@view.col, @@view.cols - 1]
       if str_line
         Curses.addstr(str_line)
       end
