@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class FileView
+class View
   attr_accessor :col, :line, :cols, :lines
 
   def initialize(cols, lines, curs)

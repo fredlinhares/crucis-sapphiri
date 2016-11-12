@@ -23,23 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
+require 'singleton'
+
 require 'curses'
 
-require './lib/data_file.rb'
-require './lib/file_view.rb'
 require './lib/command.rb'
+require './lib/core/buffer.rb'
+require './lib/core/views.rb'
 
-module Main
-  def self.update_screen
+class Main
+  include Singleton
+
+  def update_screen
     Curses.clear
     Curses.setpos(0, 0)
 
-    @@view.lines.times do |line|
+    @view.lines.times do |line|
       # Print empty lines after the end of file.
-      break if (@@view.line + line) >= @@file.lines
+      break if (@view.line + line) >= @buffer.lines
 
       # Print line at screen.
-      str_line = @@file.line(@@view.line + line)[@@view.col, @@view.cols - 1]
+      str_line = @buffer.line(@view.line + line)[@view.col, @view.cols - 1]
       if str_line
         Curses.addstr(str_line)
       end
@@ -47,40 +51,44 @@ module Main
     end
 
     Curses.setpos(
-      @@curs.line - @@view.line,
-      @@curs.col - @@view.col)
+      @curs.line - @view.line,
+      @curs.col - @view.col)
 
     Curses.refresh
   end
 
-  # Initialize curses mode.
-  Curses.init_screen
+  def run
+    # Initialize curses mode.
+    Curses.init_screen
 
-  begin
-    @@file = DataFile.new(ARGV[0])
+    begin
+      @buffer = Buffer.new(ARGV[0])
 
-    # Cursor position.
-    @@curs = @@file.cursor
+      # Cursor position.
+      @curs = @buffer.cursor
 
-    # Define the portion of the file to be drawn on the screen.
-    @@view = FileView.new(Curses.cols, Curses.lines, @@curs)
+      # Define the portion of the file to be drawn on the screen.
+      @view = View.new(Curses.cols, Curses.lines, @curs)
 
-    @@command = Command.new(@@file, @@view)
+      @commands = Command.new(@buffer, @view)
 
-    Curses.raw
-    Curses.noecho
-
-    update_screen
-
-    quit = false
-    until quit do
-      key = Curses.getch
-
-      quit = @@command.execute(key)
+      Curses.raw
+      Curses.noecho
 
       update_screen
+
+      quit = false
+      until quit do
+        key = Curses.getch
+
+        quit = @commands.execute(key)
+
+        update_screen
+      end
+    ensure
+      Curses.close_screen
     end
-  ensure
-    Curses.close_screen
   end
 end
+
+Main.instance.run

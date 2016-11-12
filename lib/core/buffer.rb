@@ -23,33 +23,54 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class FileCursor
-  def initialize(file)
-    @col = 0
-    @line = 0
+require './lib/core/buffer_cursor.rb'
 
-    @file = file
-  end
+class Buffer
+  def initialize(file_path)
+    @lines = []
+    @cursor = Cursor.new(self)
 
-  def col=(pos_col)
-    @col = pos_col
-  end
-
-  def line=(pos_line)
-    @line = pos_line
-  end
-
-  def col
-    # If a user move up or down to a row with less cols than the previous, this
-    # code prevent the y position to be lost.
-    if @file.line(@line).size < @col
-      return @file.line(@line).size
-    else
-      return @col
+    # Open file and save data from it.
+    File.open(file_path, "r") do |file|
+      while line = file.gets
+        @lines << line.chomp
+      end
     end
   end
 
-  def line
-    return @line
+  def cursor
+    return @cursor
+  end
+
+  def lines
+    return @lines.size
+  end
+
+  def line(number)
+    return @lines[number]
+  end
+
+  def set_line(number, new_line)
+    return @lines[number] = new_line
+  end
+
+  def delete_line(number)
+    @lines.delete_at(number)
+  end
+
+  def line_size(number)
+    return @lines[number].size
+  end
+
+  def split_line
+    # Split current line.
+    c_line = @lines[@cursor.line]
+    new_line = c_line[@cursor.col, c_line.length]
+    @lines.insert(@cursor.line + 1, new_line)
+    @lines[@cursor.line] = c_line[0, @cursor.col]
+
+    # Move to the begining of the new line.
+    @cursor.col = 0
+    @cursor.line += 1
   end
 end

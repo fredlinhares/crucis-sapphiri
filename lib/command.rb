@@ -24,10 +24,10 @@ SOFTWARE.
 =end
 
 class Command
-  def initialize(file, view)
-    @file = file
+  def initialize(buffer, view)
+    @buffer = buffer
     @view = view
-    @curs = file.cursor
+    @curs = buffer.cursor
   end
 
   def execute(key)
@@ -44,7 +44,7 @@ class Command
         # Move to end of prefious line.
         if @curs.line > 0 then
           @curs.line -= 1
-          @curs.col = @file.line_size(@curs.line)
+          @curs.col = @buffer.line_size(@curs.line)
         end
       else
         # Move left
@@ -54,16 +54,16 @@ class Command
 
     when "\C-t".ord then
       # Move down
-      if @curs.line < @file.lines - 1
+      if @curs.line < @buffer.lines - 1
         @curs.line += 1
         @view.update_pos
       end
 
     when "\C-n".ord then
       # If you try to move beyond the size of the line.
-      if @file.line_size(@curs.line) < (@curs.col + 1) then
+      if @buffer.line_size(@curs.line) < (@curs.col + 1) then
         # If there is another line.
-        if (@file.lines - 1) > @curs.line then
+        if (@buffer.lines - 1) > @curs.line then
           # Move to the begining of next line.
           @curs.line += 1
           @curs.col = 0
@@ -75,27 +75,27 @@ class Command
       @view.update_pos
 
     when "\n".ord then
-      @file.split_line
+      @buffer.split_line
 
     when 127 then
       # If cursor is at the begning of the line.
       if @curs.col == 0 and @curs.line > 0 then
         # Move cursor.
         @curs.line -= 1
-        @curs.col = @file.line(@curs.line).size
+        @curs.col = @buffer.line(@curs.line).size
 
         # Join two lines.
-        @file.set_line(
+        @buffer.set_line(
           @curs.line,
-          @file.line(@curs.line) + @file.line(@curs.line + 1))
+          @buffer.line(@curs.line) + @buffer.line(@curs.line + 1))
 
         # Delete old line.
-        @file.delete_line(@curs.line + 1)
+        @buffer.delete_line(@curs.line + 1)
       elsif @curs.col > 0 then
         new_line = @curs.col - 1
         # Delete char.
-        c_line = @file.line(@curs.line)
-        @file.set_line(@curs.line, c_line[0, @curs.col-1] +
+        c_line = @buffer.line(@curs.line)
+        @buffer.set_line(@curs.line, c_line[0, @curs.col-1] +
                                    c_line[@curs.col, c_line.size])
 
         # Back cursor one char.
@@ -107,9 +107,9 @@ class Command
 
     else
       if key.is_a?(String) then
-        @file.set_line(
+        @buffer.set_line(
           @curs.line,
-          @file.line(@curs.line).insert(@curs.col, key))
+          @buffer.line(@curs.line).insert(@curs.col, key))
 
         @curs.col += 1
         @view.update_pos
