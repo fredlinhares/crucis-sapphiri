@@ -23,37 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-module Core
-  class Buffer
-    class Cursor
-      def initialize(file)
-        @col = 0
-        @line = 0
+require './lib/key_map.rb'
 
-        @file = file
-      end
+module Initialize
+  def self.key_map_dvorak
+    KeyMap.instance
+      .add_key("\C-c".ord, :cursor_move_up)
+      .add_key("\C-h".ord, :cursor_move_left)
+      .add_key("\C-t".ord, :cursor_move_down)
+      .add_key("\C-n".ord, :cursor_move_right)
+      .add_key("\n".ord, :line_new)
+      .add_key(127, :delete_backward)
+      .add_key("\C-q".ord, :quit)
 
-      def col=(pos_col)
-        @col = pos_col
-      end
-
-      def line=(pos_line)
-        @line = pos_line
-      end
-
-      def col
-        # If a user move up or down to a row with less cols than the previous,
-        # this code prevent the y position to be lost.
-        if @file.line(@line).size < @col
-          return @file.line(@line).size
-        else
-          return @col
-        end
-      end
-
-      def line
-        return @line
-      end
-    end
+    return KeyMap.instance
   end
 end

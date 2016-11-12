@@ -25,52 +25,52 @@ SOFTWARE.
 
 require './lib/core/buffer_cursor.rb'
 
-class Buffer
-  def initialize(file_path)
-    @lines = []
-    @cursor = Cursor.new(self)
+module Core
+  class Buffer
+    attr_accessor :cursor
 
-    # Open file and save data from it.
-    File.open(file_path, "r") do |file|
-      while line = file.gets
-        @lines << line.chomp
+    def initialize(file_path)
+      @lines = []
+      @cursor = Cursor.new(self)
+
+      # Open file and save data from it.
+      File.open(file_path, "r") do |file|
+        while line = file.gets
+          @lines << line.chomp
+        end
       end
     end
-  end
 
-  def cursor
-    return @cursor
-  end
+    def lines
+      return @lines.size
+    end
 
-  def lines
-    return @lines.size
-  end
+    def line(number)
+      return @lines[number]
+    end
 
-  def line(number)
-    return @lines[number]
-  end
+    def set_line(number, new_line)
+      return @lines[number] = new_line
+    end
 
-  def set_line(number, new_line)
-    return @lines[number] = new_line
-  end
+    def delete_line(number)
+      @lines.delete_at(number)
+    end
 
-  def delete_line(number)
-    @lines.delete_at(number)
-  end
+    def line_size(number)
+      return @lines[number].size
+    end
 
-  def line_size(number)
-    return @lines[number].size
-  end
+    def split_line
+      # Split current line.
+      c_line = @lines[@cursor.line]
+      new_line = c_line[@cursor.col, c_line.length]
+      @lines.insert(@cursor.line + 1, new_line)
+      @lines[@cursor.line] = c_line[0, @cursor.col]
 
-  def split_line
-    # Split current line.
-    c_line = @lines[@cursor.line]
-    new_line = c_line[@cursor.col, c_line.length]
-    @lines.insert(@cursor.line + 1, new_line)
-    @lines[@cursor.line] = c_line[0, @cursor.col]
-
-    # Move to the begining of the new line.
-    @cursor.col = 0
-    @cursor.line += 1
+      # Move to the begining of the new line.
+      @cursor.col = 0
+      @cursor.line += 1
+    end
   end
 end

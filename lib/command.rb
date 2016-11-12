@@ -24,97 +24,28 @@ SOFTWARE.
 =end
 
 class Command
-  def initialize(buffer, view)
-    @buffer = buffer
-    @view = view
-    @curs = buffer.cursor
+  def initialize(name, &code)
+    @name = name
+    @code = code
+
+    # Store this command being created.
+    @@commands[name] = self
   end
 
-  def execute(key)
-    case key
-    when "\C-c".ord then
-      # Move up
-      if @curs.line > 0
-        @curs.line -= 1
-        @view.update_pos
-      end
+  # Execute this command by calling the stored code block.
+  def execute
+    @code.call
 
-    when "\C-h".ord then
-      if @curs.col == 0 then
-        # Move to end of prefious line.
-        if @curs.line > 0 then
-          @curs.line -= 1
-          @curs.col = @buffer.line_size(@curs.line)
-        end
-      else
-        # Move left
-        @curs.col -= 1
-      end
-      @view.update_pos
-
-    when "\C-t".ord then
-      # Move down
-      if @curs.line < @buffer.lines - 1
-        @curs.line += 1
-        @view.update_pos
-      end
-
-    when "\C-n".ord then
-      # If you try to move beyond the size of the line.
-      if @buffer.line_size(@curs.line) < (@curs.col + 1) then
-        # If there is another line.
-        if (@buffer.lines - 1) > @curs.line then
-          # Move to the begining of next line.
-          @curs.line += 1
-          @curs.col = 0
-        end
-      else
-        # Move foward
-        @curs.col += 1
-      end
-      @view.update_pos
-
-    when "\n".ord then
-      @buffer.split_line
-
-    when 127 then
-      # If cursor is at the begning of the line.
-      if @curs.col == 0 and @curs.line > 0 then
-        # Move cursor.
-        @curs.line -= 1
-        @curs.col = @buffer.line(@curs.line).size
-
-        # Join two lines.
-        @buffer.set_line(
-          @curs.line,
-          @buffer.line(@curs.line) + @buffer.line(@curs.line + 1))
-
-        # Delete old line.
-        @buffer.delete_line(@curs.line + 1)
-      elsif @curs.col > 0 then
-        new_line = @curs.col - 1
-        # Delete char.
-        c_line = @buffer.line(@curs.line)
-        @buffer.set_line(@curs.line, c_line[0, @curs.col-1] +
-                                   c_line[@curs.col, c_line.size])
-
-        # Back cursor one char.
-        @curs.col = new_line
-      end
-
-    when "\C-q".ord then
-      return true
-
-    else
-      if key.is_a?(String) then
-        @buffer.set_line(
-          @curs.line,
-          @buffer.line(@curs.line).insert(@curs.col, key))
-
-        @curs.col += 1
-        @view.update_pos
-      end
-    end
-    return false
+    return self
   end
+
+  # Get a stored command
+  def self.cmd(name)
+    return @@commands[name]
+  end
+
+  # Store all commands.
+  @@commands = {}
+
+  alias exe execute
 end

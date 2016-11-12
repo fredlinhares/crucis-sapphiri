@@ -23,36 +23,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-module Core
-  class Buffer
-    class Cursor
-      def initialize(file)
-        @col = 0
-        @line = 0
+require 'singleton'
 
-        @file = file
-      end
+require './lib/command.rb'
 
-      def col=(pos_col)
-        @col = pos_col
-      end
+class KeyMap
+  include Singleton
 
-      def line=(pos_line)
-        @line = pos_line
-      end
+  def initialize
+    @keys = {}
+  end
 
-      def col
-        # If a user move up or down to a row with less cols than the previous,
-        # this code prevent the y position to be lost.
-        if @file.line(@line).size < @col
-          return @file.line(@line).size
-        else
-          return @col
-        end
-      end
+  # Associate an imput to a command.
+  def add_key(key, command)
+    @keys[key] = Command.cmd(command)
 
-      def line
-        return @line
+    return self
+  end
+
+  # Calls the command associated with the key.
+  def execute(key)
+    # If is a command.
+    if @keys.has_key?(key) then
+      @keys[key].execute
+    else
+      # If is a valid character.
+      if key.is_a?(String) then
+        Core.buffer.set_line(
+          Core.cursor.line,
+          Core.buffer.line(Core.cursor.line).insert(Core.cursor.col, key))
+
+        Core.cursor.col += 1
+        Core.view.update_pos
       end
     end
   end

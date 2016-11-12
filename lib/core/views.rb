@@ -23,47 +23,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class View
-  attr_accessor :col, :line, :cols, :lines
+module Core
+  class View
+    attr_accessor :col, :line, :cols, :lines, :buffer
 
-  def initialize(cols, lines, curs)
-    @col = 0
-    @line = 0
+    def initialize(cols, lines, buffer)
+      @col = 0
+      @line = 0
 
-    @cols = cols
-    @lines = lines
+      @cols = cols
+      @lines = lines
 
-    @curs = curs
-  end
-
-  # Update view position based on cursor position.
-  def update_pos
-    # If cursor go right beyond the view.
-    if @curs.col >= (@col + @cols) then
-      # Set cursor at the center of the view.
-      @col = @curs.col - (@cols / 2)
+      @buffer = buffer
+      @curs = buffer.cursor
     end
 
-    # If cursor go left beyond the view.
-    if @curs.col < @col then
-      # Set cursor at the center of the view.
-      new_pos = @curs.col - (@cols / 2)
-      new_pos = 0 if new_pos < 0 # Prevent x from view to be negative.
-      @col = new_pos
+    def self.current
+      return @@current
     end
 
-    # If cursor go down beyond the view.
-    if @curs.line >= (@line + @lines) then
-      # Set cursor at the center of the view.
-      @line = @curs.line - (@lines / 2)
+    def set_current
+      @@current = self
     end
 
-    # If cursor go up beyond the view.
-    if @curs.line < @line then
-      # Set cursor at the center of the view.
-      new_pos = @curs.line - (@lines / 2)
-      new_pos = 0 if new_pos < 0 # Prevent y from view to be negative.
-      @line = new_pos
+    # Update view position based on cursor position.
+    def update_pos
+      # If cursor go right beyond the view.
+      if @curs.col >= (@col + @cols) then
+        # Set cursor at the center of the view.
+        @col = @curs.col - (@cols / 2)
+      end
+
+      # If cursor go left beyond the view.
+      if @curs.col < @col then
+        # Set cursor at the center of the view.
+        new_pos = @curs.col - (@cols / 2)
+        new_pos = 0 if new_pos < 0 # Prevent x from view to be negative.
+        @col = new_pos
+      end
+
+      # If cursor go down beyond the view.
+      if @curs.line >= (@line + @lines) then
+        # Set cursor at the center of the view.
+        @line = @curs.line - (@lines / 2)
+      end
+
+      # If cursor go up beyond the view.
+      if @curs.line < @line then
+        # Set cursor at the center of the view.
+        new_pos = @curs.line - (@lines / 2)
+        new_pos = 0 if new_pos < 0 # Prevent y from view to be negative.
+        @line = new_pos
+      end
     end
   end
 end

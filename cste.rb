@@ -27,7 +27,8 @@ require 'singleton'
 
 require 'curses'
 
-require './lib/command.rb'
+require './lib/initialize/commands.rb'
+require './lib/initialize/key_maps.rb'
 require './lib/core/buffer.rb'
 require './lib/core/views.rb'
 
@@ -62,26 +63,30 @@ class Main
     Curses.init_screen
 
     begin
-      @buffer = Buffer.new(ARGV[0])
+      # Load file from command line.
+      @buffer = Core::Buffer.new(ARGV[0])
 
       # Cursor position.
       @curs = @buffer.cursor
 
       # Define the portion of the file to be drawn on the screen.
-      @view = View.new(Curses.cols, Curses.lines, @curs)
+      @view = Core::View.new(Curses.cols, Curses.lines, @buffer)
 
-      @commands = Command.new(@buffer, @view)
+      @view.set_current()
+
+      Initialize::commands()
+      @key_map = Initialize::key_map_dvorak()
 
       Curses.raw
       Curses.noecho
 
       update_screen
 
-      quit = false
-      until quit do
+      $quit = false
+      until $quit do
         key = Curses.getch
 
-        quit = @commands.execute(key)
+        quit = @key_map.execute(key)
 
         update_screen
       end

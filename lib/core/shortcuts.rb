@@ -23,37 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-module Core
-  class Buffer
-    class Cursor
-      def initialize(file)
-        @col = 0
-        @line = 0
+require './lib/core/views.rb'
 
-        @file = file
-      end
+# Return current view.
+def Core::view
+  return Core::View.current
+end
 
-      def col=(pos_col)
-        @col = pos_col
-      end
+# Return current buffer.
+def Core::buffer
+  return Core::View.current.buffer
+end
 
-      def line=(pos_line)
-        @line = pos_line
-      end
-
-      def col
-        # If a user move up or down to a row with less cols than the previous,
-        # this code prevent the y position to be lost.
-        if @file.line(@line).size < @col
-          return @file.line(@line).size
-        else
-          return @col
-        end
-      end
-
-      def line
-        return @line
-      end
-    end
-  end
+# Return current cursor.
+def Core::cursor
+  return Core::View.current.buffer.cursor
 end
