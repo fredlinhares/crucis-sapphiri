@@ -42,7 +42,7 @@ module Core
       return @@current
     end
 
-    def set_current
+    def current
       @@current = self
     end
 

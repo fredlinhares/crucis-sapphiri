@@ -72,7 +72,7 @@ class Main
       # Define the portion of the file to be drawn on the screen.
       @view = Core::View.new(Curses.cols, Curses.lines, @buffer)
 
-      @view.set_current()
+      @view.current()
 
       Initialize::commands()
       @key_map = Initialize::key_map_dvorak()
