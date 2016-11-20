@@ -29,7 +29,6 @@ require 'curses'
 
 require './lib/initialize/commands.rb'
 require './lib/initialize/key_maps.rb'
-require './lib/core/buffer.rb'
 require './lib/core/views.rb'
 
 class Main
@@ -37,23 +36,45 @@ class Main
 
   def update_screen
     Curses.clear
-    Curses.setpos(0, 0)
 
-    @view.lines.times do |line|
-      # Print empty lines after the end of file.
-      break if (@view.line + line) >= @buffer.lines
+    def draw_view(view)
+      Curses.setpos(view.init_line, view.init_col)
 
-      # Print line at screen.
-      str_line = @buffer.line(@view.line + line)[@view.col, @view.cols - 1]
-      if str_line
-        Curses.addstr(str_line)
+      view.lines.times do |line|
+        # Print empty lines after the end of file.
+        break if (view.line + line) >= view.buffer.lines
+
+        # Print line at screen.
+        str_line = view.buffer.line(view.line + line)[view.col, view.cols - 1]
+        if str_line then # If line is not empty.
+          Curses.addstr(str_line)
+        end
+
+        # Move to the begining of the next line.
+        Curses.setpos(view.init_line + line + 1, view.init_col)
       end
-      Curses.addstr("\n")
     end
 
+    def draw_container(container)
+      container.list.each do |i|
+        if i.is_a?(Core::View::Container) then
+          draw_container(i)
+        else
+          draw_view(i)
+        end
+      end
+    end
+
+    if Core.view_container.nil?
+      draw_view(Core.view)
+    else
+      draw_container(Core.view_container)
+    end
+
+    # Draw cursor of current view.
     Curses.setpos(
-      @curs.line - @view.line,
-      @curs.col - @view.col)
+      Core.view.init_line + Core.cursor.line - Core.view.line,
+      Core.view.init_col + Core.cursor.col - Core.view.col)
 
     Curses.refresh
   end
@@ -64,15 +85,10 @@ class Main
 
     begin
       # Load file from command line.
-      @buffer = Core::Buffer.new(ARGV[0])
-
-      # Cursor position.
-      @curs = @buffer.cursor
+      buffer = Core::Buffer.new(ARGV[0])
 
       # Define the portion of the file to be drawn on the screen.
-      @view = Core::View.new(Curses.cols, Curses.lines, @buffer)
-
-      @view.current()
+      Core::View.new(buffer, 0, 0, Curses.cols, Curses.lines).current()
 
       Initialize::commands()
       @key_map = Initialize::key_map_dvorak()
@@ -84,9 +100,9 @@ class Main
 
       $quit = false
       until $quit do
+        # Handle input.
         key = Curses.getch
-
-        quit = @key_map.execute(key)
+        @key_map.execute(key)
 
         update_screen
       end

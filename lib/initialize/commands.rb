@@ -115,6 +115,14 @@ module Initialize
       end
     end
 
+    Command.new(:view_split_vertical) do
+      Core.view.split_vertical
+    end
+
+    Command.new(:view_split_horizontal) do
+      Core.view.split_horizontal
+    end
+
     Command.new(:quit) do
       $quit = true
     end

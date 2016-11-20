@@ -23,16 +23,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
+require './lib/core/buffer.rb'
+require './lib/core/view_container.rb'
+
 module Core
   class View
-    attr_accessor :col, :line, :cols, :lines, :buffer
+    attr_reader(
+      :col, :line, # Position on buffer.
+      :cols, :lines, # View size.
+      :init_col, :init_line) # Position on screen.
+    attr_accessor :index, :parent, :buffer
 
-    def initialize(cols, lines, buffer)
-      @col = 0
-      @line = 0
+    def initialize(buffer, init_col, init_line, cols, lines, col = 0, line = 0)
+      @init_col = init_col
+      @init_line = init_line
 
-      @cols = cols
-      @lines = lines
+      @col = col
+      @line = line
+
+      # View size.
+      size(init_col, init_line, cols, lines)
 
       @buffer = buffer
       @curs = buffer.cursor
@@ -42,8 +52,62 @@ module Core
       return @@current
     end
 
+    def next
+      # TODO
+    end
+
+    def previous
+      # TODO
+    end
+
+    def split_vertical
+      # No parent mean not inside a View::Container.
+      if @parent.nil? then
+        @@container = ContainerV.new(
+          self, @init_col, @init_line, @cols, @lines)
+
+      # Parent is a horizontal container and the division required is vertical.
+      elsif @parent.is_a?(ContainerH) then
+        container = ContainerV.new(self, @init_col, @init_line, @cols, @lines)
+        container.index = @index
+        @parent[@index] = container
+      else
+        @parent.split(@index)
+      end
+    end
+
+    def split_horizontal
+      # No parent mean not inside a View::Container.
+      if @parent.nil? then
+        @@container = ContainerH.new(
+          self, @init_col, @init_line, @cols, @lines)
+
+      # Parent is a vertical container and the division required is horizontal.
+      elsif @parent.is_a?(ContainerV) then
+        container = ContainerH.new(self, @init_col, @init_line, @cols, @lines)
+        container.index = @index
+        @parent[@index] = container
+      else
+        @parent.split(@index)
+      end
+    end
+
     def current
       @@current = self
+    end
+
+    def self.container
+      return @@container
+    end
+
+    def size(init_col, init_line, cols, lines)
+      @init_col = init_col
+      @init_line = init_line
+
+      @cols = cols
+      @lines = lines
+
+      return self
     end
 
     # Update view position based on cursor position.
@@ -76,5 +140,7 @@ module Core
         @line = new_pos
       end
     end
+
+    @@container = nil
   end
 end

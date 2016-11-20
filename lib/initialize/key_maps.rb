@@ -34,6 +34,8 @@ module Initialize
       .add_key("\C-n".ord, :cursor_move_right)
       .add_key("\n".ord, :line_new)
       .add_key(127, :delete_backward)
+      .add_key("\C-a".ord, :view_split_vertical)
+      .add_key("\C-o".ord, :view_split_horizontal)
       .add_key("\C-q".ord, :quit)
 
     return KeyMap.instance
