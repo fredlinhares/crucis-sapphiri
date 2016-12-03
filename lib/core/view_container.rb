@@ -32,7 +32,8 @@ module Core
         :list) # Position on screen.
       attr_accessor :index, :parent
 
-      def initialize(view, init_col, init_line, cols, lines)
+      def initialize(view, init_col, init_line, cols, lines, index = nil)
+        @index = index
         new_view = copy_child_view(view)
 
         # Each view know it own position under a container.

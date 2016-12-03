@@ -68,9 +68,9 @@ module Core
 
       # Parent is a horizontal container and the division required is vertical.
       elsif @parent.is_a?(ContainerH) then
-        container = ContainerV.new(self, @init_col, @init_line, @cols, @lines)
-        container.index = @index
-        @parent[@index] = container
+        @parent[@index] = ContainerV.new(
+          self, @init_col, @init_line, @cols, @lines, @index)
+
       else
         @parent.split(@index)
       end
@@ -84,9 +84,9 @@ module Core
 
       # Parent is a vertical container and the division required is horizontal.
       elsif @parent.is_a?(ContainerV) then
-        container = ContainerH.new(self, @init_col, @init_line, @cols, @lines)
-        container.index = @index
-        @parent[@index] = container
+        @parent[@index] = ContainerH.new(
+          self, @init_col, @init_line, @cols, @lines, @index)
+
       else
         @parent.split(@index)
       end
