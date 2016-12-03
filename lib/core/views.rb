@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
+require 'curses'
+
 require './lib/core/buffer.rb'
 require './lib/core/view_container.rb'
 
@@ -48,8 +50,51 @@ module Core
       @curs = buffer.cursor
     end
 
+    # Current (active) view.
     def self.current
       return @@current
+    end
+
+    # Display only this view at the interface.
+    def current
+      @@top = self
+      @@current = self
+    end
+
+    # Return the view or container at the top of the hierarchy.
+    def self.top
+      return @@top
+    end
+
+    def self.update_screen
+      Curses.clear
+
+      @@top.draw
+
+      # Draw cursor of current view.
+      Curses.setpos(
+        @@current.init_line + @@current.buffer.cursor.line - @@current.line,
+        @@current.init_col + @@current.buffer.cursor.col - @@current.col)
+
+      Curses.refresh
+    end
+
+    def draw
+      Curses.setpos(@init_line, @init_col)
+
+      @lines.times do |line|
+        # Print empty lines after the end of file.
+        break if (@line + line) >= @buffer.lines
+
+        # Print line at screen.
+        str_line = @buffer.line(@line + line)[@col, @cols - 1]
+        if str_line then # If line is not empty.
+          Curses.addstr(str_line)
+        end
+
+        # Move to the begining of the next line.
+        Curses.setpos(@init_line + line + 1, @init_col)
+      end
     end
 
     def next
@@ -63,7 +108,7 @@ module Core
     def split_vertical
       # No parent mean not inside a View::Container.
       if @parent.nil? then
-        @@container = ContainerV.new(
+        @@top = ContainerV.new(
           self, @init_col, @init_line, @cols, @lines)
 
       # Parent is a horizontal container and the division required is vertical.
@@ -79,7 +124,7 @@ module Core
     def split_horizontal
       # No parent mean not inside a View::Container.
       if @parent.nil? then
-        @@container = ContainerH.new(
+        @@top = ContainerH.new(
           self, @init_col, @init_line, @cols, @lines)
 
       # Parent is a vertical container and the division required is horizontal.
@@ -90,14 +135,6 @@ module Core
       else
         @parent.split(@index)
       end
-    end
-
-    def current
-      @@current = self
-    end
-
-    def self.container
-      return @@container
     end
 
     def size(init_col, init_line, cols, lines)
@@ -140,7 +177,5 @@ module Core
         @line = new_pos
       end
     end
-
-    @@container = nil
   end
 end

@@ -54,6 +54,10 @@ module Core
         @list[num] = val
       end
 
+      def draw
+        @list.each {|i| i.draw}
+      end
+
       def split(num)
         new_view = copy_child_view(@list[num])
         @list.insert(num + 1, new_view)

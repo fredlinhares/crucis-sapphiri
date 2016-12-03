@@ -26,8 +26,8 @@ SOFTWARE.
 require './lib/core/views.rb'
 
 # Return current view container.
-def Core::view_container
-  return Core::View.container
+def Core::view_top
+  return Core::View.top
 end
 
 # Return current view.

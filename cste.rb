@@ -34,51 +34,6 @@ require './lib/core/views.rb'
 class Main
   include Singleton
 
-  def update_screen
-    Curses.clear
-
-    def draw_view(view)
-      Curses.setpos(view.init_line, view.init_col)
-
-      view.lines.times do |line|
-        # Print empty lines after the end of file.
-        break if (view.line + line) >= view.buffer.lines
-
-        # Print line at screen.
-        str_line = view.buffer.line(view.line + line)[view.col, view.cols - 1]
-        if str_line then # If line is not empty.
-          Curses.addstr(str_line)
-        end
-
-        # Move to the begining of the next line.
-        Curses.setpos(view.init_line + line + 1, view.init_col)
-      end
-    end
-
-    def draw_container(container)
-      container.list.each do |i|
-        if i.is_a?(Core::View::Container) then
-          draw_container(i)
-        else
-          draw_view(i)
-        end
-      end
-    end
-
-    if Core.view_container.nil?
-      draw_view(Core.view)
-    else
-      draw_container(Core.view_container)
-    end
-
-    # Draw cursor of current view.
-    Curses.setpos(
-      Core.view.init_line + Core.cursor.line - Core.view.line,
-      Core.view.init_col + Core.cursor.col - Core.view.col)
-
-    Curses.refresh
-  end
-
   def run
     # Initialize curses mode.
     Curses.init_screen
@@ -96,7 +51,7 @@ class Main
       Curses.raw
       Curses.noecho
 
-      update_screen
+      Core::View.update_screen
 
       $quit = false
       until $quit do
@@ -104,7 +59,7 @@ class Main
         key = Curses.getch
         @key_map.execute(key)
 
-        update_screen
+        Core::View.update_screen
       end
     ensure
       Curses.close_screen
