@@ -105,21 +105,20 @@ module Core
       private
       def child_sizes
         # Count total cols used.
-        total_cols = 0
         cols = @cols/@list.count
+        extra_cols = @cols%@list.count
 
         # Calculate the size of almost all child, except the last.
         @list.take(@list.size - 1).each_with_index do |view, i|
-          total_cols += cols
           view.size(
-            @init_col + (i * (cols + 1)), @init_line,
+            @init_col + (i * cols), @init_line,
             cols, @lines)
         end
 
         # Calculate the last child.
         @list.last.size(
           @init_col + ((@list.size - 1) * cols), @init_line,
-          @cols - total_cols, @lines)
+          cols + extra_cols, @lines)
       end
     end
 
@@ -129,21 +128,20 @@ module Core
       private
       def child_sizes
         # Count total lines used.
-        total_lines = 0
         lines = @lines/@list.count
+        extra_lines = @lines%@list.count
 
         # Calculate the size of almost all child, except the last.
         @list.take(@list.size - 1).each_with_index do |view, i|
-          total_lines += lines
           view.size(
-            @init_col, @init_line + (i * (lines + 1)),
+            @init_col, @init_line + (i * lines),
             @cols, lines)
         end
 
         # Calculate the last child.
         @list.last.size(
           @init_col, @init_line + ((@list.size - 1) * lines),
-          @cols, @lines - total_lines)
+          @cols, lines + extra_lines)
       end
     end
   end
