@@ -82,7 +82,7 @@ module Core
     def draw
       Curses.setpos(@init_line, @init_col)
 
-      @lines.times do |line|
+      buffer_lines.times do |line|
         # Print empty lines after the end of file.
         break if (@line + line) >= @buffer.lines
 
@@ -93,7 +93,13 @@ module Core
         end
 
         # Move to the begining of the next line.
-        Curses.setpos(@init_line + line + 1, @init_col)
+        Curses.setpos(@init_line + line.next, @init_col)
+      end
+
+      # Draw a status line.
+      Curses.attron(Curses.color_pair(1)|Curses::A_NORMAL) do
+        Curses.setpos(@init_line + @lines - 1, @init_col)
+        Curses.addstr(@buffer.file)
       end
     end
 
@@ -164,18 +170,26 @@ module Core
       end
 
       # If cursor go down beyond the view.
-      if @curs.line >= (@line + @lines) then
+      if @curs.line >= (@line + buffer_lines) then
         # Set cursor at the center of the view.
-        @line = @curs.line - (@lines / 2)
+        @line = @curs.line - (buffer_lines / 2)
       end
 
       # If cursor go up beyond the view.
       if @curs.line < @line then
         # Set cursor at the center of the view.
-        new_pos = @curs.line - (@lines / 2)
+        new_pos = @curs.line - (buffer_lines / 2)
         new_pos = 0 if new_pos < 0 # Prevent y from view to be negative.
         @line = new_pos
       end
+    end
+
+    private
+
+    # The number of lines from buffer to be diplayed in the view. The view must
+    # let one last line for the status line.
+    def buffer_lines
+      return @lines - 1
     end
   end
 end

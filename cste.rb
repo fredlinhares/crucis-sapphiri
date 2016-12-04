@@ -39,6 +39,10 @@ class Main
     Curses.init_screen
 
     begin
+      # Colors.
+      Curses.start_color
+      Curses.init_pair(1, Curses::COLOR_BLUE, Curses::COLOR_WHITE)
+
       # Load file from command line.
       buffer = Core::Buffer.new(ARGV[0])
 

@@ -28,10 +28,13 @@ require './lib/core/buffer_cursor.rb'
 module Core
   class Buffer
     attr_accessor :cursor
+    attr_reader :file
 
     def initialize(file_path)
       @lines = []
       @cursor = Cursor.new(self)
+
+      @file = file_path
 
       # Open file and save data from it.
       File.open(file_path, "r") do |file|
