@@ -4,6 +4,8 @@
 
 Text editor in Ruby.
 
+This project is in early stage of development and is not usable yet.
+
 ## Instalation
 
 Run `bundle` to install dependences.
