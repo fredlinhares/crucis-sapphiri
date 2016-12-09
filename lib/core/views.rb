@@ -27,6 +27,7 @@ require 'curses'
 
 require './lib/core/buffer.rb'
 require './lib/core/view_container.rb'
+require './lib/core/view_echo.rb'
 
 module Core
   class View
@@ -70,6 +71,10 @@ module Core
       Curses.clear
 
       @@top.draw
+
+      # Draw echo area.
+      Curses.setpos(Curses.lines - 1, 0)
+      Curses.addstr(EchoArea.instance.text)
 
       # Draw cursor of current view.
       Curses.setpos(

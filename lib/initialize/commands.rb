@@ -24,6 +24,7 @@ SOFTWARE.
 =end
 
 require './lib/command.rb'
+require './lib/key_map.rb'
 require './lib/core/buffer.rb'
 require './lib/core/views.rb'
 require './lib/core/shortcuts.rb'
@@ -121,6 +122,16 @@ module Initialize
 
     Command.new(:view_split_horizontal) do
       Core.view.split_horizontal
+    end
+
+    # Change to mode that with commands for views.
+    Command.new(:mode_change_view) do
+      KeyMap.instance.mode(:View)
+    end
+
+    # Change to mode that with commands for views.
+    Command.new(:mode_default) do
+      KeyMap.instance.mode_default()
     end
 
     Command.new(:quit) do

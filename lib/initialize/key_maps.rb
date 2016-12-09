@@ -32,12 +32,17 @@ module Initialize
       .add_key("\C-h".ord, :cursor_move_left)
       .add_key("\C-t".ord, :cursor_move_down)
       .add_key("\C-n".ord, :cursor_move_right)
+      .add_key("\C-v".ord, :mode_change_view)
       .add_key("\n".ord, :line_new)
       .add_key(127, :delete_backward)
-      .add_key("\C-a".ord, :view_split_vertical)
-      .add_key("\C-o".ord, :view_split_horizontal)
       .add_key("\C-q".ord, :quit)
 
+    KeyMap.instance.mode(:View)
+      .add_key("v", :view_split_vertical)
+      .add_key("h", :view_split_horizontal)
+      .add_key("\C-[".ord, :mode_default)
+
+    KeyMap.instance.mode_default()
     return KeyMap.instance
   end
 end

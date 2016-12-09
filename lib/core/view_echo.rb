@@ -23,53 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-require 'singleton'
+module Core
+  class View
+    class EchoArea
+      include Singleton
 
-require 'curses'
-
-require './lib/initialize/commands.rb'
-require './lib/initialize/key_maps.rb'
-require './lib/core/views.rb'
-
-class Main
-  include Singleton
-
-  def run
-    # Initialize curses mode.
-    Curses.init_screen
-
-    begin
-      # Colors.
-      Curses.start_color
-      Curses.init_pair(1, Curses::COLOR_BLUE, Curses::COLOR_WHITE)
-
-      # Load file from command line.
-      buffer = Core::Buffer.new(ARGV[0])
-
-      # Define the portion of the file to be drawn on the screen. Let one line
-      # for echo area.
-      Core::View.new(buffer, 0, 0, Curses.cols, Curses.lines - 1).current()
-
-      Initialize::commands()
-      @key_map = Initialize::key_map_dvorak()
-
-      Curses.raw
-      Curses.noecho
-
-      Core::View.update_screen
-
-      $quit = false
-      until $quit do
-        # Handle input.
-        key = Curses.getch
-        @key_map.execute(key)
-
-        Core::View.update_screen
-      end
-    ensure
-      Curses.close_screen
+      attr_accessor :text
     end
   end
 end
-
-Main.instance.run

@@ -26,17 +26,49 @@ SOFTWARE.
 require 'singleton'
 
 require './lib/command.rb'
+require './lib/core/views.rb'
 
 class KeyMap
   include Singleton
 
   def initialize
     @keys = {}
+
+    @mod_keys = {}
+    mode_default()
   end
 
-  # Associate an imput to a command.
+  # Associate an input to a command.
   def add_key(key, command)
-    @keys[key] = Command.cmd(command)
+    @actual_map[key] = Command.cmd(command)
+
+    return self
+  end
+
+  # Return current mode.
+  def mode
+    return @mod
+  end
+
+  # Change current mode.
+  def mode(mode)
+    @mode = mode
+    @mod_keys[@mode] = {} unless @mod_keys.has_key? mode
+    @actual_map = @mod_keys[@mode]
+
+    # Show current mode at echo area.
+    Core::View::EchoArea.instance.text = @mode.to_s
+
+    return self
+  end
+
+  # Change to default mode.
+  def mode_default
+    @mode = nil
+    @actual_map = @keys
+
+    # Show current mode at echo area.
+    Core::View::EchoArea.instance.text = @mode.to_s
 
     return self
   end
@@ -44,9 +76,9 @@ class KeyMap
   # Calls the command associated with the key.
   def execute(key)
     # If is a command.
-    if @keys.has_key?(key) then
-      @keys[key].execute
-    else
+    if @actual_map.has_key?(key) then
+      @actual_map[key].execute
+    elsif @mode.nil?
       # If is a valid character.
       if key.is_a?(String) then
         Core.buffer.set_line(
