@@ -29,7 +29,7 @@ require 'curses'
 
 require './lib/initialize/commands.rb'
 require './lib/initialize/key_maps.rb'
-require './lib/core/views.rb'
+require './lib/core/view.rb'
 
 class Main
   include Singleton

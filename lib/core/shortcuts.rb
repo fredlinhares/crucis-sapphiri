@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-require './lib/core/views.rb'
+require './lib/core/view.rb'
 
 # Return current view container.
 def Core::view_top

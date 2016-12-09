@@ -26,7 +26,7 @@ SOFTWARE.
 require './lib/command.rb'
 require './lib/key_map.rb'
 require './lib/core/buffer.rb'
-require './lib/core/views.rb'
+require './lib/core/view.rb'
 require './lib/core/shortcuts.rb'
 
 module Initialize

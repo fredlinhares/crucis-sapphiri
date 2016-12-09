@@ -26,7 +26,7 @@ SOFTWARE.
 require 'singleton'
 
 require './lib/command.rb'
-require './lib/core/views.rb'
+require './lib/core/view.rb'
 
 class KeyMap
   include Singleton
