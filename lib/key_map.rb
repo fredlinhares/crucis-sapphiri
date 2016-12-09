@@ -29,56 +29,48 @@ require './lib/command.rb'
 require './lib/core/view.rb'
 
 class KeyMap
-  include Singleton
+  # When non-false the current mode allow insertion of chracteres in the
+  # currentbuffer.
+  attr_accessor :insert_key
 
-  def initialize
+  attr_reader :name
+
+  def initialize(name=nil)
+    @name = name
     @keys = {}
 
-    @mod_keys = {}
-    mode_default()
+    # Store this map.
+    @@maps[name] = self
   end
 
   # Associate an input to a command.
   def add_key(key, command)
-    @actual_map[key] = Command.cmd(command)
+    @keys[key] = Command.cmd(command)
 
     return self
   end
 
-  # Return current mode.
-  def mode
-    return @mod
-  end
-
-  # Change current mode.
-  def mode(mode)
-    @mode = mode
-    @mod_keys[@mode] = {} unless @mod_keys.has_key? mode
-    @actual_map = @mod_keys[@mode]
+  # Set current map.
+  def self.set(name=nil)
+    @@current = @@maps[name]
 
     # Show current mode at echo area.
-    Core::View::EchoArea.instance.text = @mode.to_s
+    Core::View::EchoArea.instance.text = @@current.name.to_s
 
-    return self
+    return @@current
   end
 
-  # Change to default mode.
-  def mode_default
-    @mode = nil
-    @actual_map = @keys
-
-    # Show current mode at echo area.
-    Core::View::EchoArea.instance.text = @mode.to_s
-
-    return self
+  # Get current map.
+  def self.current
+    return @@current
   end
 
   # Calls the command associated with the key.
   def execute(key)
     # If is a command.
-    if @actual_map.has_key?(key) then
-      @actual_map[key].execute
-    elsif @mode.nil?
+    if @keys.has_key?(key) then
+      @keys[key].execute
+    elsif @insert_key then
       # If is a valid character.
       if key.is_a?(String) then
         Core.buffer.set_line(
@@ -90,4 +82,7 @@ class KeyMap
       end
     end
   end
+
+    # Store all maps.
+  @@maps = {}
 end

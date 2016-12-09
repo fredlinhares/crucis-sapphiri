@@ -51,7 +51,7 @@ class Main
       Core::View.new(buffer, 0, 0, Curses.cols, Curses.lines - 1).current()
 
       Initialize::commands()
-      @key_map = Initialize::key_map_dvorak()
+      Initialize::key_map_dvorak()
 
       Curses.raw
       Curses.noecho
@@ -62,7 +62,7 @@ class Main
       until $quit do
         # Handle input.
         key = Curses.getch
-        @key_map.execute(key)
+        KeyMap.current.execute(key)
 
         Core::View.update_screen
       end

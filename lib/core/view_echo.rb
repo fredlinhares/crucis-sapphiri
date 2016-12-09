@@ -29,6 +29,10 @@ module Core
       include Singleton
 
       attr_accessor :text
+
+      def initialize
+        @text = ""
+      end
     end
   end
 end

@@ -126,12 +126,12 @@ module Initialize
 
     # Change to mode that with commands for views.
     Command.new(:mode_change_view) do
-      KeyMap.instance.mode(:View)
+      KeyMap.set(:View)
     end
 
     # Change to mode that with commands for views.
     Command.new(:mode_default) do
-      KeyMap.instance.mode_default()
+      KeyMap.set
     end
 
     Command.new(:quit) do

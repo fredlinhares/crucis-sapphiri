@@ -27,7 +27,7 @@ require './lib/key_map.rb'
 
 module Initialize
   def self.key_map_dvorak
-    KeyMap.instance
+    KeyMap.new
       .add_key("\C-c".ord, :cursor_move_up)
       .add_key("\C-h".ord, :cursor_move_left)
       .add_key("\C-t".ord, :cursor_move_down)
@@ -36,13 +36,16 @@ module Initialize
       .add_key("\n".ord, :line_new)
       .add_key(127, :delete_backward)
       .add_key("\C-q".ord, :quit)
+      .insert_key = true
 
-    KeyMap.instance.mode(:View)
+    KeyMap.new(:View)
       .add_key("v", :view_split_vertical)
       .add_key("h", :view_split_horizontal)
       .add_key("\C-[".ord, :mode_default)
+      .insert_key = false
 
-    KeyMap.instance.mode_default()
-    return KeyMap.instance
+    #Set default key map as initial.
+    KeyMap.set
+    return nil
   end
 end
