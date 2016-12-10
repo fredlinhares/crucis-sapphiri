@@ -32,8 +32,10 @@ module Core
         :list) # Position on screen.
       attr_accessor :index, :parent
 
-      def initialize(view, init_col, init_line, cols, lines, index = nil)
+      def initialize(view, init_col, init_line, cols, lines, index = nil,
+                     parent=nil)
         @index = index
+        @parent = parent
         new_view = copy_child_view(view)
 
         # Each view know it own position under a container.
@@ -56,6 +58,22 @@ module Core
 
       def draw
         @list.each {|i| i.draw}
+      end
+
+      def forward(caller_index)
+        if @list.size > caller_index.next then
+          return @list[caller_index.next].view_first
+        else
+          if @parent.nil? then
+            return @list[0].view_first
+          else
+            return @parent.forward(@index)
+          end
+        end
+      end
+
+      def view_first
+        return @list[0].view_first
       end
 
       def split(num)

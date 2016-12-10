@@ -57,8 +57,13 @@ module Core
     end
 
     # Display only this view at the interface.
-    def current
+    def only
       @@top = self
+      @@current = self
+    end
+
+    # Set this buffer as current.
+    def current
       @@current = self
     end
 
@@ -109,11 +114,19 @@ module Core
     end
 
     def next
-      # TODO
+      if @parent.nil? then
+        return self
+      else
+        return @parent.forward(index)
+      end
     end
 
     def previous
       # TODO
+    end
+
+    def view_first
+      return self
     end
 
     def split_vertical
@@ -125,7 +138,7 @@ module Core
       # Parent is a horizontal container and the division required is vertical.
       elsif @parent.is_a?(ContainerH) then
         @parent[@index] = ContainerV.new(
-          self, @init_col, @init_line, @cols, @lines, @index)
+          self, @init_col, @init_line, @cols, @lines, @index, @parent)
 
       else
         @parent.split(@index)
@@ -141,7 +154,7 @@ module Core
       # Parent is a vertical container and the division required is horizontal.
       elsif @parent.is_a?(ContainerV) then
         @parent[@index] = ContainerH.new(
-          self, @init_col, @init_line, @cols, @lines, @index)
+          self, @init_col, @init_line, @cols, @lines, @index, @parent)
 
       else
         @parent.split(@index)

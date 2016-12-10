@@ -116,12 +116,20 @@ module Initialize
       end
     end
 
+    # Split current view on vertical.
     Command.new(:view_split_vertical) do
       Core.view.split_vertical
     end
 
+    # Split current view on horizontal.
     Command.new(:view_split_horizontal) do
       Core.view.split_horizontal
+    end
+
+    # Move to next view.
+    Command.new(:view_move_next) do
+      Core.view.next.current()
+      Core.view.update_pos()
     end
 
     # Change to mode that with commands for views.
