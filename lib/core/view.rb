@@ -121,11 +121,19 @@ module Core
       end
     end
 
-    def previous
-      # TODO
+    def pred
+      if @parent.nil? then
+        return self
+      else
+        return @parent.backward(index)
+      end
     end
 
     def view_first
+      return self
+    end
+
+    def view_last
       return self
     end
 

@@ -132,6 +132,12 @@ module Initialize
       Core.view.update_pos()
     end
 
+    # Move to previous view.
+    Command.new(:view_move_previous) do
+      Core.view.pred.current()
+      Core.view.update_pos()
+    end
+
     # Change to mode that with commands for views.
     Command.new(:mode_change_view) do
       KeyMap.set(:View)

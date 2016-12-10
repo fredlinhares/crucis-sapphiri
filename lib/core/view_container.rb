@@ -72,8 +72,24 @@ module Core
         end
       end
 
+      def backward(caller_index)
+        if caller_index > 0 then
+          return @list[caller_index.pred].view_last
+        else
+          if @parent.nil? then
+            return @list[-1].view_last
+          else
+            return @parent.backward(@index)
+          end
+        end
+      end
+
       def view_first
         return @list[0].view_first
+      end
+
+      def view_last
+        return @list[-1].view_last
       end
 
       def split(num)
