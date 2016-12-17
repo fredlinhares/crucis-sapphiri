@@ -133,7 +133,7 @@ module Initialize
     end
 
     # Move to previous view.
-    Command.new(:view_move_previous) do
+    Command.new(:view_move_pred) do
       Core.view.pred.current()
       Core.view.update_pos()
     end
