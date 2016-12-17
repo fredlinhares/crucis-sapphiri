@@ -35,7 +35,7 @@ module Core
       :col, :line, # Position on buffer.
       :cols, :lines, # View size.
       :init_col, :init_line) # Position on screen.
-    attr_accessor :index, :parent, :buffer
+    attr_accessor :index, :lord, :buffer
 
     def initialize(buffer, init_col, init_line, cols, lines, col = 0, line = 0)
       @init_col = init_col
@@ -58,7 +58,7 @@ module Core
 
     # Display only this view at the interface.
     def only
-      @@top = self
+      @@king = self
       @@current = self
     end
 
@@ -67,15 +67,15 @@ module Core
       @@current = self
     end
 
-    # Return the view or container at the top of the hierarchy.
-    def self.top
-      return @@top
+    # Return the view or container that is the king of the hierarchy.
+    def self.king
+      return @@king
     end
 
     def self.update_screen
       Curses.clear
 
-      @@top.draw
+      @@king.draw
 
       # Draw echo area.
       Curses.setpos(Curses.lines - 1, 0)
@@ -113,22 +113,28 @@ module Core
       end
     end
 
+    # When there are multiple views in the editor, return the next view. Return
+    # itself when there is no other view.
     def next
-      if @parent.nil? then
+      if @lord.nil? then
         return self
       else
-        return @parent.forward(index)
+        return @lord.forward(index)
       end
     end
 
+    # When there are multiple views in the editor, return the previous view.
+    # Return itself when there is no other view.
     def pred
-      if @parent.nil? then
+      if @lord.nil? then
         return self
       else
-        return @parent.backward(index)
+        return @lord.backward(index)
       end
     end
 
+    # Those methods ('view_first' and 'view_last') exist to give a common
+    # interface between View and Container.
     def view_first
       return self
     end
@@ -138,34 +144,36 @@ module Core
     end
 
     def split_vertical
-      # No parent mean not inside a View::Container.
-      if @parent.nil? then
-        @@top = ContainerV.new(
+      # No lord mean not under any container.
+      if @lord.nil? then
+        @@king = ContainerV.new(
           self, @init_col, @init_line, @cols, @lines)
 
-      # Parent is a horizontal container and the division required is vertical.
-      elsif @parent.is_a?(ContainerH) then
-        @parent[@index] = ContainerV.new(
-          self, @init_col, @init_line, @cols, @lines, @index, @parent)
+      # This view serves a horizontal container and the division required is
+      # vertical.
+      elsif @lord.is_a?(ContainerH) then
+        @lord[@index] = ContainerV.new(
+          self, @init_col, @init_line, @cols, @lines, @index, @lord)
 
       else
-        @parent.split(@index)
+        @lord.split(@index)
       end
     end
 
     def split_horizontal
-      # No parent mean not inside a View::Container.
-      if @parent.nil? then
-        @@top = ContainerH.new(
+      # No lord mean not under any container.
+      if @lord.nil? then
+        @@king = ContainerH.new(
           self, @init_col, @init_line, @cols, @lines)
 
-      # Parent is a vertical container and the division required is horizontal.
-      elsif @parent.is_a?(ContainerV) then
-        @parent[@index] = ContainerH.new(
-          self, @init_col, @init_line, @cols, @lines, @index, @parent)
+      # This view serves a vertical container and the division required is
+      # horizontal.
+      elsif @lord.is_a?(ContainerV) then
+        @lord[@index] = ContainerH.new(
+          self, @init_col, @init_line, @cols, @lines, @index, @lord)
 
       else
-        @parent.split(@index)
+        @lord.split(@index)
       end
     end
 
@@ -219,3 +227,11 @@ module Core
     end
   end
 end
+
+__END__
+
+View, ContainerV and ContainerH are organized in a hierarchy. The element in
+the top of the hierarchy is called "king". The elements in the bottom of the
+hierarchy are always views. View and Container have some methods with identical
+interface to allow a Container call for its vassals without need to distinguish
+if those vassals are containers or views.

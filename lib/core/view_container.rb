@@ -28,78 +28,89 @@ module Core
     class Container
       attr_reader(
         :cols, :lines, # Container size.
-        :init_col, :init_line,
-        :list) # Position on screen.
-      attr_accessor :index, :parent
+        :init_col, :init_line, # Position on screen.
+        :vassals)
+      attr_accessor :index, :lord
 
       def initialize(view, init_col, init_line, cols, lines, index = nil,
-                     parent=nil)
+                     lord = nil)
         @index = index
-        @parent = parent
-        new_view = copy_child_view(view)
+        @lord = lord
+        new_view = copy_vassal_view(view)
 
         # Each view know it own position under a container.
         view.index = 0
         new_view.index = 1
 
         # Containers/Views inside it.
-        @list = [view, new_view]
+        @vassals = [view, new_view]
 
         size(init_col, init_line, cols, lines)
       end
 
       def [](num)
-        return @list[num]
+        return @vassals[num]
       end
 
       def []=(num, val)
-        @list[num] = val
+        @vassals[num] = val
       end
 
       def draw
-        @list.each {|i| i.draw}
+        @vassals.each {|i| i.draw}
       end
 
-      def forward(caller_index)
-        if @list.size > caller_index.next then
-          return @list[caller_index.next].view_first
+      # A recursive function to move forward in the View hierarchy.
+      def forward(vassal_index)
+        # If the index is not of the last vassal, return the first view of the
+        # next vassal.
+        if @vassals.size > vassal_index.next then
+          return @vassals[vassal_index.next].view_first
         else
-          if @parent.nil? then
-            return @list[0].view_first
+          if @lord.nil? then
+            # Return the first view of the first vassal.
+            return @vassals[0].view_first
           else
-            return @parent.forward(@index)
+            return @lord.forward(@index)
           end
         end
       end
 
-      def backward(caller_index)
-        if caller_index > 0 then
-          return @list[caller_index.pred].view_last
+      # A recursive function to move backward in the View hierarchy.
+      def backward(vassal_index)
+        # If the index is not of the first vassal, return the last view of the
+        # last vassal.
+        if vassal_index > 0 then
+          return @vassals[vassal_index.pred].view_last
         else
-          if @parent.nil? then
-            return @list[-1].view_last
+          if @lord.nil? then
+            # Return the last view of the last vassal.
+            return @vassals[-1].view_last
           else
-            return @parent.backward(@index)
+            return @lord.backward(@index)
           end
         end
       end
 
+      # Return the first vassal from this Container.
       def view_first
-        return @list[0].view_first
+        return @vassals[0].view_first
       end
 
+      # Return the last vassal from this Container.
       def view_last
-        return @list[-1].view_last
+        return @vassals[-1].view_last
       end
 
-      def split(num)
-        new_view = copy_child_view(@list[num])
-        @list.insert(num + 1, new_view)
+      # Split in two the vassal with a given index.
+      def split(vassal_index)
+        new_view = copy_vassal_view(@vassals[vassal_index])
+        @vassals.insert(vassal_index + 1, new_view)
 
         # Each view/container know it own position under a container.
-        @list.each_with_index{|view, i| view.index = i}
+        @vassals.each_with_index{|view, i| view.index = i}
 
-        child_sizes()
+        vassal_sizes()
 
         return self
       end
@@ -111,7 +122,7 @@ module Core
         @cols = cols
         @lines = lines
 
-        child_sizes()
+        vassal_sizes()
 
         return self
       end
@@ -119,62 +130,62 @@ module Core
       private
 
       # Create a new view that points to the same buffer.
-      def copy_child_view(view)
+      def copy_vassal_view(view)
         # Copy this view to a new one. Both views needs to point to the same
         # buffer.
         new_view = View.new(
           view.buffer, view.init_col, view.init_line, view.cols, view.lines)
 
-        # This container is parent of those views.
-        view.parent = self
-        new_view.parent = self
+        # This container is the lord of those views.
+        view.lord = self
+        new_view.lord = self
 
         return new_view
       end
     end
 
-    # Container for views split in the vertical.
+    # Container for views organized in the vertical.
     class ContainerV < Container
 
       private
-      def child_sizes
+      def vassal_sizes
         # Count total cols used.
-        cols = @cols/@list.count
-        extra_cols = @cols%@list.count
+        cols = @cols/@vassals.count
+        extra_cols = @cols%@vassals.count
 
-        # Calculate the size of almost all child, except the last.
-        @list.take(@list.size - 1).each_with_index do |view, i|
+        # Calculate the size of almost all vassals, except the last.
+        @vassals.take(@vassals.size - 1).each_with_index do |view, i|
           view.size(
             @init_col + (i * cols), @init_line,
             cols, @lines)
         end
 
-        # Calculate the last child.
-        @list.last.size(
-          @init_col + ((@list.size - 1) * cols), @init_line,
+        # Calculate the last vassal.
+        @vassals.last.size(
+          @init_col + ((@vassals.size - 1) * cols), @init_line,
           cols + extra_cols, @lines)
       end
     end
 
-    # Container for views split in the horizontal.
+    # Container for views organized in the horizontal.
     class ContainerH < Container
 
       private
-      def child_sizes
+      def vassal_sizes
         # Count total lines used.
-        lines = @lines/@list.count
-        extra_lines = @lines%@list.count
+        lines = @lines/@vassals.count
+        extra_lines = @lines%@vassals.count
 
-        # Calculate the size of almost all child, except the last.
-        @list.take(@list.size - 1).each_with_index do |view, i|
+        # Calculate the size of almost all vassals, except the last.
+        @vassals.take(@vassals.size - 1).each_with_index do |view, i|
           view.size(
             @init_col, @init_line + (i * lines),
             @cols, lines)
         end
 
-        # Calculate the last child.
-        @list.last.size(
-          @init_col, @init_line + ((@list.size - 1) * lines),
+        # Calculate the last vassal.
+        @vassals.last.size(
+          @init_col, @init_line + ((@vassals.size - 1) * lines),
           @cols, lines + extra_lines)
       end
     end
