@@ -57,7 +57,8 @@ module Core
     end
 
     # Display only this view at the interface.
-    def only
+    def king
+      @lord = nil
       @@king = self
       @@current = self
     end
@@ -68,6 +69,10 @@ module Core
     end
 
     # Return the view or container that is the king of the hierarchy.
+    def self.king=(k)
+      @@king = k
+    end
+
     def self.king
       return @@king
     end
@@ -174,6 +179,14 @@ module Core
 
       else
         @lord.split(@index)
+      end
+    end
+
+    def delete
+      if @lord.nil? then
+        return self
+      else
+        return @lord.delete(@index)
       end
     end
 

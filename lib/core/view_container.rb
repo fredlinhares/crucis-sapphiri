@@ -56,6 +56,11 @@ module Core
         @vassals[num] = val
       end
 
+      def king
+        @lord = nil
+        king = self
+      end
+
       def draw
         @vassals.each {|i| i.draw}
       end
@@ -113,6 +118,42 @@ module Core
         vassal_sizes()
 
         return self
+      end
+
+      # Delete the current view.
+      def delete(vassal_index)
+        @vassals.delete_at(vassal_index)
+
+        # Now organize the hierarchy.
+
+        # If there more than one views left in the Container, just organize it.
+        if @vassals.count > 1 then
+          # Each view/container know it own position under a container.
+          @vassals.each_with_index{|view, i| view.index = i}
+
+          # Resize vassals that still exist.
+          vassal_sizes()
+        else
+          # If there are no other vassals left in this container, the last
+          # vassal will replace this container.
+          # The last vassal get the same size from this container.
+          @vassals[0].size(@init_col, @init_line, @cols, @lines)
+
+          # If this container have no lord, it is the king. The last vassal
+          # become the new king
+          if @lord.nil? then
+            @vassals[0].king()
+
+          # If this container have a lord, the last container assume it place.
+          else
+            @vassals[0].lord = @lord
+            @vassals[0].index = @index
+
+            @lord.vassals[@index] = @vassals[0]
+          end
+        end
+
+        return @vassals[0].view_first.current()
       end
 
       def size(init_col, init_line, cols, lines)

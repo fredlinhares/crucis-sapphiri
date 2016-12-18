@@ -126,6 +126,11 @@ module Initialize
       Core.view.split_horizontal
     end
 
+    # Delete current view.
+    Command.new(:view_delete) do
+      Core.view.delete()
+    end
+
     # Move to next view.
     Command.new(:view_move_next) do
       Core.view.next.current()

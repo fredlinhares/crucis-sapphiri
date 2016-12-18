@@ -48,7 +48,7 @@ class Main
 
       # Define the portion of the file to be drawn on the screen. Let one line
       # for echo area.
-      Core::View.new(buffer, 0, 0, Curses.cols, Curses.lines - 1).only()
+      Core::View.new(buffer, 0, 0, Curses.cols, Curses.lines - 1).king()
 
       Initialize::commands()
       Initialize::key_map_dvorak()

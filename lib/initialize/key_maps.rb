@@ -41,6 +41,7 @@ module Initialize
     KeyMap.new(:View)
       .add_key("v", :view_split_vertical)
       .add_key("h", :view_split_horizontal)
+      .add_key("d", :view_delete)
       .add_key("n", :view_move_next)
       .add_key("p", :view_move_pred)
       .add_key("\C-[".ord, :mode_default)
