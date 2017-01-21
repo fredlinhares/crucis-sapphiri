@@ -82,6 +82,16 @@ module Initialize
       Core.view.update_pos
     end
 
+    # Move cursor to the start of current line.
+    Command.new(:cursor_move_line_start) do
+      Core.cursor.col = 0
+    end
+
+    # Move cursor to the end of current line.
+    Command.new(:cursor_move_line_end) do
+      Core.cursor.col = Core.buffer.line_size(Core.cursor.line)
+    end
+
     # Creat a new line. Enter/Ruturn default function.
     Command.new(:line_new) do
       Core.buffer.split_line

@@ -28,23 +28,25 @@ require './lib/key_map.rb'
 module Initialize
   def self.key_map_dvorak
     KeyMap.new
-      .add_key("\C-c".ord, :cursor_move_up)
-      .add_key("\C-h".ord, :cursor_move_left)
-      .add_key("\C-t".ord, :cursor_move_down)
-      .add_key("\C-n".ord, :cursor_move_right)
-      .add_key("\C-v".ord, :mode_change_view)
-      .add_key("\n".ord, :line_new)
-      .add_key(127, :delete_backward)
-      .add_key("\C-q".ord, :quit)
+      .add_key([:ctrl, ?c], :cursor_move_up)
+      .add_key([:ctrl, ?h], :cursor_move_left)
+      .add_key([:ctrl, ?t], :cursor_move_down)
+      .add_key([:ctrl, ?n], :cursor_move_right)
+      .add_key([:alt, :ctrl, ?h], :cursor_move_line_start)
+      .add_key([:alt, :ctrl, ?n], :cursor_move_line_end)
+      .add_key([?\n], :line_new)
+      .add_key([127], :delete_backward)
+      .add_key([:ctrl, ?v], :mode_change_view)
+      .add_key([:ctrl, ?q], :quit)
       .insert_key = true
 
     KeyMap.new(:View)
-      .add_key("v", :view_split_vertical)
-      .add_key("h", :view_split_horizontal)
-      .add_key("d", :view_delete)
-      .add_key("n", :view_move_next)
-      .add_key("p", :view_move_pred)
-      .add_key("\C-[".ord, :mode_default)
+      .add_key(?v, :view_split_vertical)
+      .add_key(?h, :view_split_horizontal)
+      .add_key(?d, :view_delete)
+      .add_key(?n, :view_move_next)
+      .add_key(?p, :view_move_pred)
+      .add_key(?q, :mode_default)
       .insert_key = false
 
     #Set default key map as initial.

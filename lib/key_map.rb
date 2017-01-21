@@ -33,11 +33,13 @@ class KeyMap
   # currentbuffer.
   attr_accessor :insert_key
 
+  # The default key_map have a nil value as name.
   attr_reader :name
 
   def initialize(name=nil)
     @name = name
     @keys = {}
+    @alt_keys = {}
 
     # Store this map.
     @@maps[name] = self
@@ -45,7 +47,31 @@ class KeyMap
 
   # Associate an input to a command.
   def add_key(key, command)
-    @keys[key] = Command.cmd(command)
+    # A key can be only a char or a char with a combination of modifiers.
+    if key.is_a?(Array) then
+      # The last element must be a char.
+      char_key = to_ord(key.pop)
+
+      if key.include?(:ctrl) then
+        # Convert to upcase if nescessary.
+        char_key -= 32 if char_key > 96 and char_key < 123
+
+        # To apply ctrl to a char we need to subtract 64.
+        char_key -= 64
+      end
+
+      # 'Alt' + 'something' send two signals. So, after a signal 27 (esc/alt)
+      # editor waits for the next signal and look for @alt_keys instead of
+      # @keys.
+      # 'Esc' + 'something' works in the same way than 'alt' + 'something'.
+      if key.include?(:alt) then
+        @alt_keys[char_key] = Command.cmd(command)
+      else
+        @keys[char_key] = Command.cmd(command)
+      end
+    else
+      @keys[to_ord(key)] = Command.cmd(command)
+    end
 
     return self
   end
@@ -67,9 +93,18 @@ class KeyMap
 
   # Calls the command associated with the key.
   def execute(key)
+    # If is a 'alt/esc' + somathing command.
+    if key == 27 then
+      # Get the next key.
+      next_key = Curses.getch()
+      if @alt_keys.has_key?(to_ord(next_key)) then
+        @alt_keys[to_ord(next_key)].execute
+      end
+
     # If is a command.
-    if @keys.has_key?(key) then
-      @keys[key].execute
+    elsif @keys.has_key?(to_ord(key)) then
+      @keys[to_ord(key)].execute
+
     elsif @insert_key then
       # If is a valid character.
       if key.is_a?(String) then
@@ -83,6 +118,17 @@ class KeyMap
     end
   end
 
-    # Store all maps.
+  private
+
+  # All commands are stored as ordinals. Convert a key to ordinal if necessary.
+  def to_ord(key)
+    if key.is_a?(String) then
+      return key.ord
+    else
+      return key
+    end
+  end
+
+  # Store all maps.
   @@maps = {}
 end
