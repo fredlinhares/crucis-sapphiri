@@ -71,5 +71,3 @@ class Main
     end
   end
 end
-
-Main.instance.run
