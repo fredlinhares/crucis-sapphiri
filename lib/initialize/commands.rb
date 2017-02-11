@@ -34,21 +34,16 @@ module Initialize
 
     # Move cursor up.
     Command.new(:cursor_move_up) do
-      if Core.cursor.line > 0
-        # Move up
-        Core.cursor.line -= 1
-        Core.view.update_pos
-      end
+      Core.cursor.line -= 1
+      Core.view.update_pos
     end
 
     # Move cursor left.
     Command.new(:cursor_move_left) do
-      if Core.cursor.col == 0 then
-        # Move to end of prefious line.
-        if Core.cursor.line > 0 then
+      # Move to end of prefious line.
+      if Core.cursor.col == 0 and Core.cursor.line > 0 then
           Core.cursor.line -= 1
           Core.cursor.col = Core.buffer.line_size(Core.cursor.line)
-        end
       else
         # Move left
         Core.cursor.col -= 1
@@ -58,23 +53,17 @@ module Initialize
 
     # Move cursor down.
     Command.new(:cursor_move_down) do
-      if Core.cursor.line < Core.buffer.lines - 1
-        # Move down
-        Core.cursor.line += 1
-        Core.view.update_pos
-      end
+      Core.cursor.line += 1
+      Core.view.update_pos
     end
 
     # Move cursor right.
     Command.new(:cursor_move_right) do
-      # If you try to move beyond the size of the line.
-      if Core.buffer.line_size(Core.cursor.line) < (Core.cursor.col + 1) then
-        # If there is another line.
-        if (Core.buffer.lines - 1) > Core.cursor.line then
-          # Move to the begining of next line.
-          Core.cursor.line += 1
-          Core.cursor.col = 0
-        end
+      if Core.buffer.line_size(Core.cursor.line) < (Core.cursor.col + 1) and
+        (Core.buffer.lines - 1) > Core.cursor.line then
+        # Move to the begining of next line.
+        Core.cursor.line += 1
+        Core.cursor.col = 0
       else
         # Move right.
         Core.cursor.col += 1
