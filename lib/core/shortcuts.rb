@@ -26,21 +26,21 @@ SOFTWARE.
 require './lib/core/view.rb'
 
 # Return current view container.
-def Core::view_top
-  return Core::View.top
+def CSTE::view_top
+  return CSTE::View.top
 end
 
 # Return current view.
-def Core::view
-  return Core::View.current
+def CSTE::view
+  return CSTE::View.current
 end
 
 # Return current buffer.
-def Core::buffer
-  return Core::View.current.buffer
+def CSTE::buffer
+  return CSTE::View.current.buffer
 end
 
 # Return current cursor.
-def Core::cursor
-  return Core::View.current.buffer.cursor
+def CSTE::cursor
+  return CSTE::View.current.buffer.cursor
 end

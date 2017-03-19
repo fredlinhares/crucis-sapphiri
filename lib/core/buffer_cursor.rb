@@ -23,43 +23,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-module Core
+module CSTE
   class Buffer
     class Cursor
-      def initialize(buffer)
-        @col = 0
-        @line = 0
-
-        @buffer = buffer
-      end
-
-      def col=(pos_col)
-        if pos_col >= 0 and pos_col <= @buffer.line(@line).size
-          @col = pos_col
-        end
-        return @col
-      end
-
-      def line=(pos_line)
-        if pos_line >= 0 and pos_line < @buffer.lines
-          @line = pos_line
-        end
-        return @line
-      end
-
-      def col
-        # If a user move up or down to a row with less cols than the previous,
-        # this code prevent the y position to be lost.
-        if @buffer.line(@line).size < @col
-          return @buffer.line(@line).size
-        else
-          return @col
-        end
-      end
-
-      def line
-        return @line
-      end
     end
+  end
+end
+
+class CSTE::Buffer::Cursor
+  def initialize(buffer)
+    @col = 0
+    @line = 0
+
+    @buffer = buffer
+  end
+
+  def col=(pos_col)
+    if pos_col >= 0 and pos_col <= @buffer.line(@line).size
+      @col = pos_col
+    end
+    return @col
+  end
+
+  def line=(pos_line)
+    if pos_line >= 0 and pos_line < @buffer.lines
+      @line = pos_line
+    end
+    return @line
+  end
+
+  def col
+    # If a user move up or down to a row with less cols than the previous, this
+    # code prevent the y position to be lost.
+    if @buffer.line(@line).size < @col
+      return @buffer.line(@line).size
+    else
+      return @col
+    end
+  end
+
+  def line
+    return @line
   end
 end

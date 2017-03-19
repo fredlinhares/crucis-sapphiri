@@ -28,7 +28,12 @@ require 'singleton'
 require './lib/command.rb'
 require './lib/core/view.rb'
 
-class KeyMap
+module CSTE
+  class KeyMap
+  end
+end
+
+class CSTE::KeyMap
   # When non-false the current mode allow insertion of chracteres in the
   # currentbuffer.
   attr_accessor :insert_key
@@ -65,12 +70,12 @@ class KeyMap
       # @keys.
       # 'Esc' + 'something' works in the same way than 'alt' + 'something'.
       if key.include?(:alt) then
-        @alt_keys[char_key] = Command.cmd(command)
+        @alt_keys[char_key] = CSTE::Command.cmd(command)
       else
-        @keys[char_key] = Command.cmd(command)
+        @keys[char_key] = CSTE::Command.cmd(command)
       end
     else
-      @keys[to_ord(key)] = Command.cmd(command)
+      @keys[to_ord(key)] = CSTE::Command.cmd(command)
     end
 
     return self
@@ -81,7 +86,7 @@ class KeyMap
     @@current = @@maps[name]
 
     # Show current mode at echo area.
-    Core::View::EchoArea.instance.text = @@current.name.to_s
+    CSTE::View::EchoArea.instance.text = @@current.name.to_s
 
     return @@current
   end
@@ -108,12 +113,12 @@ class KeyMap
     elsif @insert_key then
       # If is a valid character.
       if key.is_a?(String) then
-        Core.buffer.set_line(
-          Core.cursor.line,
-          Core.buffer.line(Core.cursor.line).insert(Core.cursor.col, key))
+        CSTE::buffer.set_line(
+          CSTE::cursor.line,
+          CSTE::buffer.line(CSTE::cursor.line).insert(CSTE::cursor.col, key))
 
-        Core.cursor.col += 1
-        Core.view.update_pos
+        CSTE::cursor.col += 1
+        CSTE::view.update_pos
       end
     end
   end

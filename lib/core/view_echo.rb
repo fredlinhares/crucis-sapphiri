@@ -23,16 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-module Core
+module CSTE
   class View
     class EchoArea
-      include Singleton
-
-      attr_accessor :text
-
-      def initialize
-        @text = ""
-      end
     end
+  end
+end
+
+class CSTE::View::EchoArea
+  include Singleton
+
+  attr_accessor :text
+
+  def initialize
+    @text = ""
   end
 end

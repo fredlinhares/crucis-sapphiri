@@ -23,7 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =end
 
-class Command
+module CSTE
+  class Command
+  end
+end
+
+class CSTE::Command
   def initialize(name, &code)
     @name = name
     @code = code

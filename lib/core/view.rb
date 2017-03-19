@@ -29,215 +29,218 @@ require './lib/core/buffer.rb'
 require './lib/core/view_container.rb'
 require './lib/core/view_echo.rb'
 
-module Core
+module CSTE
   class View
-    attr_reader(
-      :col, :line, # Position on buffer.
-      :cols, :lines, # View size.
-      :init_col, :init_line) # Position on screen.
-    attr_accessor :index, :lord, :buffer
+  end
+end
 
-    def initialize(buffer, init_col, init_line, cols, lines, col = 0, line = 0)
-      @init_col = init_col
-      @init_line = init_line
+class CSTE::View
+  attr_reader(
+    :col, :line, # Position on buffer.
+    :cols, :lines, # View size.
+    :init_col, :init_line) # Position on screen.
+  attr_accessor :index, :lord, :buffer
 
-      @col = col
-      @line = line
+  def initialize(buffer, init_col, init_line, cols, lines, col = 0, line = 0)
+    @init_col = init_col
+    @init_line = init_line
 
-      # View size.
-      size(init_col, init_line, cols, lines)
+    @col = col
+    @line = line
 
-      @buffer = buffer
-      @curs = buffer.cursor
-    end
+    # View size.
+    size(init_col, init_line, cols, lines)
 
-    # Current (active) view.
-    def self.current
-      return @@current
-    end
+    @buffer = buffer
+    @curs = buffer.cursor
+  end
 
-    # Display only this view at the interface.
-    def king
-      @lord = nil
-      @@king = self
-      @@current = self
-    end
+  # Current (active) view.
+  def self.current
+    return @@current
+  end
 
-    # Set this buffer as current.
-    def current
-      @@current = self
-    end
+  # Display only this view at the interface.
+  def king
+    @lord = nil
+    @@king = self
+    @@current = self
+  end
 
-    # Return the view or container that is the king of the hierarchy.
-    def self.king=(k)
-      @@king = k
-    end
+  # Set this buffer as current.
+  def current
+    @@current = self
+  end
 
-    def self.king
-      return @@king
-    end
+  # Return the view or container that is the king of the hierarchy.
+  def self.king=(k)
+    @@king = k
+  end
 
-    def self.update_screen
-      Curses.clear
+  def self.king
+    return @@king
+  end
 
-      @@king.draw
+  def self.update_screen
+    Curses.clear
 
-      # Draw echo area.
-      Curses.setpos(Curses.lines - 1, 0)
-      Curses.addstr(EchoArea.instance.text)
+    @@king.draw
 
-      # Draw cursor of current view.
-      Curses.setpos(
-        @@current.init_line + @@current.buffer.cursor.line - @@current.line,
-        @@current.init_col + @@current.buffer.cursor.col - @@current.col)
+    # Draw echo area.
+    Curses.setpos(Curses.lines - 1, 0)
+    Curses.addstr(EchoArea.instance.text)
 
-      Curses.refresh
-    end
+    # Draw cursor of current view.
+    Curses.setpos(
+      @@current.init_line + @@current.buffer.cursor.line - @@current.line,
+      @@current.init_col + @@current.buffer.cursor.col - @@current.col)
 
-    def draw
-      Curses.setpos(@init_line, @init_col)
+    Curses.refresh
+  end
 
-      buffer_lines.times do |line|
-        # Print empty lines after the end of file.
-        break if (@line + line) >= @buffer.lines
+  def draw
+    Curses.setpos(@init_line, @init_col)
 
-        # Print line at screen.
-        str_line = @buffer.line(@line + line)[@col, @cols - 1]
-        if str_line then # If line is not empty.
-          Curses.addstr(str_line)
-        end
+    buffer_lines.times do |line|
+      # Print empty lines after the end of file.
+      break if (@line + line) >= @buffer.lines
 
-        # Move to the begining of the next line.
-        Curses.setpos(@init_line + line.next, @init_col)
+      # Print line at screen.
+      str_line = @buffer.line(@line + line)[@col, @cols - 1]
+      if str_line then # If line is not empty.
+        Curses.addstr(str_line)
       end
 
-      # Draw a status line.
-      Curses.attron(Curses.color_pair(1)|Curses::A_NORMAL) do
-        Curses.setpos(@init_line + @lines - 1, @init_col)
-        Curses.addstr(@buffer.file)
-      end
+      # Move to the begining of the next line.
+      Curses.setpos(@init_line + line.next, @init_col)
     end
 
-    # When there are multiple views in the editor, return the next view. Return
-    # itself when there is no other view.
-    def next
-      if @lord.nil? then
-        return self
-      else
-        return @lord.forward(index)
-      end
+    # Draw a status line.
+    Curses.attron(Curses.color_pair(1)|Curses::A_NORMAL) do
+      Curses.setpos(@init_line + @lines - 1, @init_col)
+      Curses.addstr(@buffer.file)
     end
+  end
 
-    # When there are multiple views in the editor, return the previous view.
-    # Return itself when there is no other view.
-    def pred
-      if @lord.nil? then
-        return self
-      else
-        return @lord.backward(index)
-      end
-    end
-
-    # Those methods ('view_first' and 'view_last') exist to give a common
-    # interface between View and Container.
-    def view_first
+  # When there are multiple views in the editor, return the next view. Return
+  # itself when there is no other view.
+  def next
+    if @lord.nil? then
       return self
+    else
+      return @lord.forward(index)
     end
+  end
 
-    def view_last
+  # When there are multiple views in the editor, return the previous view.
+  # Return itself when there is no other view.
+  def pred
+    if @lord.nil? then
       return self
+    else
+      return @lord.backward(index)
     end
+  end
 
-    def split_vertical
-      # No lord mean not under any container.
-      if @lord.nil? then
-        @@king = ContainerV.new(
-          self, @init_col, @init_line, @cols, @lines)
+  # Those methods ('view_first' and 'view_last') exist to give a common
+  # interface between View and Container.
+  def view_first
+    return self
+  end
 
-      # This view serves a horizontal container and the division required is
-      # vertical.
-      elsif @lord.is_a?(ContainerH) then
-        @lord[@index] = ContainerV.new(
-          self, @init_col, @init_line, @cols, @lines, @index, @lord)
+  def view_last
+    return self
+  end
 
-      else
-        @lord.split(@index)
-      end
+  def split_vertical
+    # No lord mean not under any container.
+    if @lord.nil? then
+      @@king = ContainerV.new(
+        self, @init_col, @init_line, @cols, @lines)
+
+    # This view serves a horizontal container and the division required is
+    # vertical.
+    elsif @lord.is_a?(ContainerH) then
+      @lord[@index] = ContainerV.new(
+        self, @init_col, @init_line, @cols, @lines, @index, @lord)
+
+    else
+      @lord.split(@index)
     end
+  end
 
-    def split_horizontal
-      # No lord mean not under any container.
-      if @lord.nil? then
-        @@king = ContainerH.new(
-          self, @init_col, @init_line, @cols, @lines)
+  def split_horizontal
+    # No lord mean not under any container.
+    if @lord.nil? then
+      @@king = ContainerH.new(
+        self, @init_col, @init_line, @cols, @lines)
 
-      # This view serves a vertical container and the division required is
-      # horizontal.
-      elsif @lord.is_a?(ContainerV) then
-        @lord[@index] = ContainerH.new(
-          self, @init_col, @init_line, @cols, @lines, @index, @lord)
+    # This view serves a vertical container and the division required is
+    # horizontal.
+    elsif @lord.is_a?(ContainerV) then
+      @lord[@index] = ContainerH.new(
+        self, @init_col, @init_line, @cols, @lines, @index, @lord)
 
-      else
-        @lord.split(@index)
-      end
+    else
+      @lord.split(@index)
     end
+  end
 
-    def delete
-      if @lord.nil? then
-        return self
-      else
-        return @lord.delete(@index)
-      end
-    end
-
-    def size(init_col, init_line, cols, lines)
-      @init_col = init_col
-      @init_line = init_line
-
-      @cols = cols
-      @lines = lines
-
+  def delete
+    if @lord.nil? then
       return self
+    else
+      return @lord.delete(@index)
+    end
+  end
+
+  def size(init_col, init_line, cols, lines)
+    @init_col = init_col
+    @init_line = init_line
+
+    @cols = cols
+    @lines = lines
+
+    return self
+  end
+
+  # Update view position based on cursor position.
+  def update_pos
+    # If cursor go right beyond the view.
+    if @curs.col >= (@col + @cols) then
+      # Set cursor at the center of the view.
+      @col = @curs.col - (@cols / 2)
     end
 
-    # Update view position based on cursor position.
-    def update_pos
-      # If cursor go right beyond the view.
-      if @curs.col >= (@col + @cols) then
-        # Set cursor at the center of the view.
-        @col = @curs.col - (@cols / 2)
-      end
-
-      # If cursor go left beyond the view.
-      if @curs.col < @col then
-        # Set cursor at the center of the view.
-        new_pos = @curs.col - (@cols / 2)
-        new_pos = 0 if new_pos < 0 # Prevent x from view to be negative.
-        @col = new_pos
-      end
-
-      # If cursor go down beyond the view.
-      if @curs.line >= (@line + buffer_lines) then
-        # Set cursor at the center of the view.
-        @line = @curs.line - (buffer_lines / 2)
-      end
-
-      # If cursor go up beyond the view.
-      if @curs.line < @line then
-        # Set cursor at the center of the view.
-        new_pos = @curs.line - (buffer_lines / 2)
-        new_pos = 0 if new_pos < 0 # Prevent y from view to be negative.
-        @line = new_pos
-      end
+    # If cursor go left beyond the view.
+    if @curs.col < @col then
+      # Set cursor at the center of the view.
+      new_pos = @curs.col - (@cols / 2)
+      new_pos = 0 if new_pos < 0 # Prevent x from view to be negative.
+      @col = new_pos
     end
 
-    private
-
-    # The number of lines from buffer to be diplayed in the view. The view must
-    # let one last line for the status line.
-    def buffer_lines
-      return @lines - 1
+    # If cursor go down beyond the view.
+    if @curs.line >= (@line + buffer_lines) then
+      # Set cursor at the center of the view.
+      @line = @curs.line - (buffer_lines / 2)
     end
+
+    # If cursor go up beyond the view.
+    if @curs.line < @line then
+      # Set cursor at the center of the view.
+      new_pos = @curs.line - (buffer_lines / 2)
+      new_pos = 0 if new_pos < 0 # Prevent y from view to be negative.
+      @line = new_pos
+    end
+  end
+
+  private
+
+  # The number of lines from buffer to be diplayed in the view. The view must
+  # let one last line for the status line.
+  def buffer_lines
+    return @lines - 1
   end
 end
 

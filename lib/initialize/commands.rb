@@ -29,130 +29,135 @@ require './lib/core/buffer.rb'
 require './lib/core/view.rb'
 require './lib/core/shortcuts.rb'
 
-module Initialize
+module CSTE
+  module Initialize
+  end
+end
+
+module CSTE::Initialize
   def self.commands
 
     # Move cursor up.
-    Command.new(:cursor_move_up) do
-      Core.cursor.line -= 1
-      Core.view.update_pos
+    CSTE::Command.new(:cursor_move_up) do
+      CSTE.cursor.line -= 1
+      CSTE.view.update_pos
     end
 
     # Move cursor left.
-    Command.new(:cursor_move_left) do
+    CSTE::Command.new(:cursor_move_left) do
       # Move to end of prefious line.
-      if Core.cursor.col == 0 and Core.cursor.line > 0 then
-          Core.cursor.line -= 1
-          Core.cursor.col = Core.buffer.line_size(Core.cursor.line)
+      if CSTE.cursor.col == 0 and CSTE.cursor.line > 0 then
+          CSTE.cursor.line -= 1
+          CSTE.cursor.col = CSTE.buffer.line_size(CSTE.cursor.line)
       else
         # Move left
-        Core.cursor.col -= 1
+        CSTE.cursor.col -= 1
       end
-      Core.view.update_pos
+      CSTE.view.update_pos
     end
 
     # Move cursor down.
-    Command.new(:cursor_move_down) do
-      Core.cursor.line += 1
-      Core.view.update_pos
+    CSTE::Command.new(:cursor_move_down) do
+      CSTE.cursor.line += 1
+      CSTE.view.update_pos
     end
 
     # Move cursor right.
-    Command.new(:cursor_move_right) do
-      if Core.buffer.line_size(Core.cursor.line) < (Core.cursor.col + 1) and
-        (Core.buffer.lines - 1) > Core.cursor.line then
+    CSTE::Command.new(:cursor_move_right) do
+      if CSTE.buffer.line_size(CSTE.cursor.line) < (CSTE.cursor.col + 1) and
+        (CSTE.buffer.lines - 1) > CSTE.cursor.line then
         # Move to the begining of next line.
-        Core.cursor.line += 1
-        Core.cursor.col = 0
+        CSTE.cursor.line += 1
+        CSTE.cursor.col = 0
       else
         # Move right.
-        Core.cursor.col += 1
+        CSTE.cursor.col += 1
       end
-      Core.view.update_pos
+      CSTE.view.update_pos
     end
 
     # Move cursor to the start of current line.
-    Command.new(:cursor_move_line_start) do
-      Core.cursor.col = 0
+    CSTE::Command.new(:cursor_move_line_start) do
+      CSTE.cursor.col = 0
     end
 
     # Move cursor to the end of current line.
-    Command.new(:cursor_move_line_end) do
-      Core.cursor.col = Core.buffer.line_size(Core.cursor.line)
+    CSTE::Command.new(:cursor_move_line_end) do
+      CSTE.cursor.col = CSTE.buffer.line_size(CSTE.cursor.line)
     end
 
     # Creat a new line. Enter/Ruturn default function.
-    Command.new(:line_new) do
-      Core.buffer.split_line
+    CSTE::Command.new(:line_new) do
+      CSTE.buffer.split_line
     end
 
     # Remove previous chracter. Backspace defalt function.
-    Command.new(:delete_backward) do
+    CSTE::Command.new(:delete_backward) do
       # If cursor is at the begning of the line.
-      if Core.cursor.col == 0 and Core.cursor.line > 0 then
+      if CSTE.cursor.col == 0 and CSTE.cursor.line > 0 then
         # Move cursor.
-        Core.cursor.line -= 1
-        Core.cursor.col = Core.buffer.line(Core.cursor.line).size
+        CSTE.cursor.line -= 1
+        CSTE.cursor.col = CSTE.buffer.line(CSTE.cursor.line).size
 
         # Join two lines.
-        Core.buffer.set_line(
-          Core.cursor.line,
-          Core.buffer.line(Core.cursor.line) +
-          Core.buffer.line(Core.cursor.line + 1))
+        CSTE.buffer.set_line(
+          CSTE.cursor.line,
+          CSTE.buffer.line(CSTE.cursor.line) +
+          CSTE.buffer.line(CSTE.cursor.line + 1))
 
         # Delete old line.
-        Core.buffer.delete_line(Core.cursor.line + 1)
-      elsif Core.cursor.col > 0 then
-        new_line = Core.cursor.col - 1
+        CSTE.buffer.delete_line(CSTE.cursor.line + 1)
+      elsif CSTE.cursor.col > 0 then
+        new_line = CSTE.cursor.col - 1
         # Delete char.
-        c_line = Core.buffer.line(Core.cursor.line)
-        Core.buffer.set_line(
-          Core.cursor.line,
-          c_line[0, Core.cursor.col-1] + c_line[Core.cursor.col, c_line.size])
+        c_line = CSTE.buffer.line(CSTE.cursor.line)
+        CSTE.buffer.set_line(
+          CSTE.cursor.line,
+          c_line[0, CSTE.cursor.col-1] + c_line[CSTE.cursor.col, c_line.size])
 
         # Back cursor one char.
-        Core.cursor.col = new_line
+        CSTE.cursor.col = new_line
       end
     end
 
     # Split current view on vertical.
-    Command.new(:view_split_vertical) do
-      Core.view.split_vertical
+    CSTE::Command.new(:view_split_vertical) do
+      CSTE.view.split_vertical
     end
 
     # Split current view on horizontal.
-    Command.new(:view_split_horizontal) do
-      Core.view.split_horizontal
+    CSTE::Command.new(:view_split_horizontal) do
+      CSTE.view.split_horizontal
     end
 
     # Delete current view.
-    Command.new(:view_delete) do
-      Core.view.delete()
+    CSTE::Command.new(:view_delete) do
+      CSTE.view.delete()
     end
 
     # Move to next view.
-    Command.new(:view_move_next) do
-      Core.view.next.current()
-      Core.view.update_pos()
+    CSTE::Command.new(:view_move_next) do
+      CSTE.view.next.current()
+      CSTE.view.update_pos()
     end
 
     # Move to previous view.
-    Command.new(:view_move_pred) do
-      Core.view.pred.current()
-      Core.view.update_pos()
+    CSTE::Command.new(:view_move_pred) do
+      CSTE.view.pred.current()
+      CSTE.view.update_pos()
     end
 
     # Change to mode that with commands for views.
-    Command.new(:mode_change_view) do
-      KeyMap.set(:View)
+    CSTE::Command.new(:mode_change_view) do
+      CSTE::KeyMap.set(:View)
     end
 
     # Change to mode that with commands for views.
-    Command.new(:mode_default) do
-      KeyMap.set
+    CSTE::Command.new(:mode_default) do
+      CSTE::KeyMap.set
     end
 
-    Command.new(:quit) do
+    CSTE::Command.new(:quit) do
       $quit = true
     end
 
